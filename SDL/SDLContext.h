@@ -11,12 +11,24 @@ namespace mop
 
 	class SDLContext
 	{
+		////
+		// Singlton
+	private:
+		static SDLContext* _instance;
 	public:
-		SDLContext();
-		~SDLContext();
+		static SDLContext* GetInstance() {
+			if (_instance == nullptr) {
+				_instance = new SDLContext();
+			}
+			return _instance;
+		}
 	private:
 		// 使用するフォントファイル名
 		const char* TTF_FONT_NAME = "sazanami-gothic.ttf";
+	private:
+		SDLContext();
+	public:
+		~SDLContext();
 	public:
 		bool Initialize();
 		void Destroy();
@@ -25,6 +37,8 @@ namespace mop
 
 		// 文字列が焼きこまれたスプライトを生成
 		std::shared_ptr<Sprite> CreateStringSprite(TTF_Font* font, const std::string str, SDL_Color color);
+		// 画像からスプライトを生成
+		std::shared_ptr<Sprite> CreateSprite(const std::string name);
 
 	public:
 		SDL_Window* window;

@@ -1,6 +1,8 @@
 
 #include "SDLContext.h"
 
+#include <SDL_image.h>
+
 namespace mop
 {
 
@@ -26,6 +28,7 @@ namespace mop
 		SDL_RenderCopy(context->renderer, texture, &srcRect, &dstRect);
 	}
 
+	SDLContext* SDLContext::_instance = nullptr;
 
 	SDLContext::SDLContext()
 	{
@@ -88,18 +91,36 @@ namespace mop
 	// 文字列が焼きこまれたスプライトを生成
 	std::shared_ptr<Sprite> SDLContext::CreateStringSprite(TTF_Font* font, const std::string str, SDL_Color color)
 	{
-		SDL_Surface *surface;
-		std::shared_ptr<Sprite> sprite;
-
-		surface = TTF_RenderUTF8_Solid(font, str.c_str(), color);
+		SDL_Surface* surface = TTF_RenderUTF8_Solid(font, str.c_str(), color);
 		if (surface == nullptr) {
 			return nullptr;
 		}
 
-		sprite = std::shared_ptr<Sprite>(new Sprite(this, surface));
+		std::shared_ptr<Sprite> sprite = std::shared_ptr<Sprite>(new Sprite(this, surface));
 		SDL_FreeSurface(surface);
 
 		return sprite;
 	}
+
+	////
+	// 画像からスプライトを生成
+	std::shared_ptr<Sprite> SDLContext::CreateSprite(const std::string name)
+	{
+		SDL_RWops* rwops = SDL_RWFromFile(name.c_str(), "rb");
+		if (rwops == nullptr) {
+			return nullptr;
+		}
+
+		SDL_Surface* surface = IMG_LoadPNG_RW(rwops);
+		if (surface == nullptr) {
+			return nullptr;
+		}
+
+		std::shared_ptr<Sprite> sprite = std::shared_ptr<Sprite>(new Sprite(this, surface));
+		SDL_FreeSurface(surface);
+
+		return sprite;
+	}
+
 
 }
