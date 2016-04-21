@@ -8,6 +8,9 @@ OBJS = \
 	SDLContext.o \
 	Explorer.o \
 	JoyStick.o \
+	WGWidgetBase.o \
+	WGWidgetManager.o \
+	WGSprite.o \
 
 LIBS =
 
@@ -22,10 +25,18 @@ OmxPlayer.o: Player/OmxPlayer.cpp
 	$(CXX) $(CXXFLAGS) -c Player/OmxPlayer.cpp -o OmxPlayer.o $(LIBS)
 Explorer.o: Player/Explorer.cpp
 	$(CXX) $(CXXFLAGS) -c Player/Explorer.cpp -o Explorer.o $(LIBS)
+
 SDLContext.o: SDL/SDLContext.cpp
 	$(CXX) $(CXXFLAGS) -c SDL/SDLContext.cpp -o SDLContext.o $(LIBS)	
 JoyStick.o: SDL/JoyStick.cpp
-	$(CXX) $(CXXFLAGS) -c SDL/JoyStick.cpp -o JoyStick.o $(LIBS)		
+	$(CXX) $(CXXFLAGS) -c SDL/JoyStick.cpp -o JoyStick.o $(LIBS)
+	
+WGWidgetBase.o: Widget/WGWidgetBase.cpp
+	$(CXX) $(CXXFLAGS) -c Widget/WGWidgetBase.cpp -o WGWidgetBase.o $(LIBS)
+WGWidgetManager.o: Widget/WGWidgetManager.cpp
+	$(CXX) $(CXXFLAGS) -c Widget/WGWidgetManager.cpp -o WGWidgetManager.o $(LIBS)
+WGSprite.o: Widget/Parts/WGSprite.cpp
+	$(CXX) $(CXXFLAGS) -c Widget/Parts/WGSprite.cpp -o WGSprite.o $(LIBS)
 all:	$(TARGET)
 
 clean:
