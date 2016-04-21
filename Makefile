@@ -9,7 +9,6 @@ OBJS = \
 	Explorer.o \
 	JoyStick.o \
 	WGWidgetBase.o \
-	WGWidgetManager.o \
 	WGSprite.o \
 
 LIBS =
@@ -33,8 +32,6 @@ JoyStick.o: SDL/JoyStick.cpp
 	
 WGWidgetBase.o: Widget/WGWidgetBase.cpp
 	$(CXX) $(CXXFLAGS) -c Widget/WGWidgetBase.cpp -o WGWidgetBase.o $(LIBS)
-WGWidgetManager.o: Widget/WGWidgetManager.cpp
-	$(CXX) $(CXXFLAGS) -c Widget/WGWidgetManager.cpp -o WGWidgetManager.o $(LIBS)
 WGSprite.o: Widget/Parts/WGSprite.cpp
 	$(CXX) $(CXXFLAGS) -c Widget/Parts/WGSprite.cpp -o WGSprite.o $(LIBS)
 all:	$(TARGET)

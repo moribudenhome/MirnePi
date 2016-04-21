@@ -116,15 +116,11 @@ namespace widget
 		////
 		// 階層構造関連
 	private:
-		/** 管理者 */
-		boost::weak_ptr< WGWidgetManager > rootWidgetManager;
 		/** 親ウィジェット */
 		boost::weak_ptr< WGWidgetBase > parentWidget;
 		/** 子ウィジェット */
 		std::vector< boost::weak_ptr< WGWidgetBase > > childWidgets;
 	public:
-		/** 管理者を設定 */
-		void setRootWidgetManager( boost::weak_ptr< WGWidgetManager > root ){ this->rootWidgetManager = root; };
 		/** 親ウィジェットを設定 */
 		void setParentWidget( boost::weak_ptr< WGWidgetBase > parent ){ this->parentWidget = parent; };
 		/** 子ウィジェットを追加 */

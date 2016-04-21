@@ -184,8 +184,6 @@ namespace widget
 			return;
 		}
 
-		// 管理者を設定
-		widget.lock()->setRootWidgetManager( rootWidgetManager ); 
 		// 親を設定
 		widget.lock()->setParentWidget( shared_from_this() );
 
