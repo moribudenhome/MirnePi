@@ -1,3 +1,4 @@
+#if 0
 
 #include "SDL/SDLContext.h"
 #include "Player/Explorer.h"
@@ -44,4 +45,49 @@ int main()
 		}
 		usleep(100000);
 	}
+}
+
+
+#endif
+
+#include "SDL/SDLContext.h"
+#include "Widget/Parts/WGSprite.h"
+
+int main()
+{
+	mop::SDLContext* sdl = mop::SDLContext::GetInstance();
+	sdl->Initialize();
+
+	//auto sprite = sdl.CreateSprite( "sample.png" );
+
+	auto root = widget::WGWidgetBase::create();
+	auto sprite = widget::WGSprite::createSprite(root, "sample.png");
+	sprite.lock()->setPos( 50, 50 );
+	auto sprite2 = widget::WGSprite::createSprite(sprite, "sample.png");
+	sprite2.lock()->setPos(50, 10);
+
+	while (true) {
+		SDL_Event ev;
+		while (SDL_PollEvent(&ev)) {
+			switch (ev.type) {
+			case SDL_QUIT:
+				return 0;
+			case SDL_KEYDOWN:
+				int key = ev.key.keysym.sym;
+				if (key == SDLK_ESCAPE) {
+					return 0;
+				}
+				break;
+			}
+		}
+		sdl->BeginRender();
+		root->update(NULL);
+		root->draw(NULL);
+		sdl->EndRender();
+	}
+
+	//auto wm = widget::WGWidgetManager::createWidgetManager();
+	//auto w = widget::WGWidgetBase::createWidget<widget::WGSprite>();
+	//auto w2 = widget::WGWidgetBase::createWidget<widget::WGSprite>();
+	//w->addWidget(w2);
 }

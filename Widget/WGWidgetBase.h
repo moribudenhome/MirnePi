@@ -26,17 +26,18 @@ namespace widget
 		virtual ~WGWidgetBase(void);
 		
 		/** widgetを生成 */
-		template < typename T >
-		static boost::weak_ptr< T > createWidget( boost::weak_ptr<WGWidgetBase> parent ){
+	protected:
+		template < typename T>
+		static boost::weak_ptr< T > createWidget( boost::weak_ptr<WGWidgetBase> parent, boost::shared_ptr< T > ptr){
 			if (!parent.lock()) {
 				return boost::weak_ptr< T >();
 			}
-			auto w = boost::shared_ptr< T >(new T);
-			(boost::dynamic_pointer_cast<WGWidgetBase>(w))->Initialize();
-			parent.lock()->addWidget(w);
-			return w;
+			(boost::dynamic_pointer_cast<WGWidgetBase>(ptr))->Initialize();
+			parent.lock()->addWidget(ptr);
+			return ptr;
 		}
-		static boost::shared_ptr<WGWidgetBase> createRootWidget() {
+	public:
+		static boost::shared_ptr<WGWidgetBase> create() {
 			return boost::shared_ptr<WGWidgetBase>(new WGWidgetBase());
 		}
 

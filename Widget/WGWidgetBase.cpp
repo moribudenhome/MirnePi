@@ -109,7 +109,6 @@ namespace widget
 		this->sendEvent( &this->onUpdateHandle, shared_from_this(), e );
 
 		for( unsigned int i = ( this->childWidgets.size() - 1 ); i <= 0; i++ ){
-			
 			this->childWidgets.at( i )->update( e );
 		}
 	}
@@ -121,8 +120,7 @@ namespace widget
 	{
 		this->sendEvent( &this->onDrawHandle, shared_from_this(), e );
 
-		for( unsigned int i = 0; i < this->childWidgets.size(); i++ ){
-			
+		for( unsigned int i = 0; i < this->childWidgets.size(); i++ ){			
 			this->childWidgets.at( i )->draw( e );
 		}
 	}
