@@ -6,8 +6,9 @@ namespace widget
 {
 	class WGSprite : public WGWidgetBase
 	{
-	public:
+	protected:
 		WGSprite();
+	public:
 		~WGSprite();
 	};
 }

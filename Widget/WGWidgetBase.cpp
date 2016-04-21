@@ -98,29 +98,6 @@ namespace widget
 	}
 
 	/** 
-	 * 指定座標と重なるか取得
-	 */
-	boost::weak_ptr< WGWidgetBase > WGWidgetBase::isHit( float x, float y )
-	{
-		if( this->getPosX() <= x && x < ( this->getPosX() + this->size.width )
-			&& this->getPosY() <= y && y < (this->getPosY() + this->size.height ) )
-		{
-			for( unsigned int i = 0; i < this->childWidgets.size(); i++ ){
-				
-				boost::weak_ptr< WGWidgetBase > widget = this->childWidgets.at( i ).lock()->isHit( x, y );
-				if( widget.lock() ){
-					return ( widget );
-				}
-			}
-			
-			return ( shared_from_this() );
-		}
-
-		return ( boost::weak_ptr< WGWidgetBase >() );
-	}
-
-
-	/** 
 	 * 更新処理(WidgetManagerから呼ばれる)
 	 */
 	void WGWidgetBase::update( WGEventArgs* e )
@@ -133,7 +110,7 @@ namespace widget
 
 		for( unsigned int i = ( this->childWidgets.size() - 1 ); i <= 0; i++ ){
 			
-			this->childWidgets.at( i ).lock()->update( e );
+			this->childWidgets.at( i )->update( e );
 		}
 	}
 
@@ -146,7 +123,7 @@ namespace widget
 
 		for( unsigned int i = 0; i < this->childWidgets.size(); i++ ){
 			
-			this->childWidgets.at( i ).lock()->draw( e );
+			this->childWidgets.at( i )->draw( e );
 		}
 	}
 
@@ -178,14 +155,14 @@ namespace widget
 	/** 
 	 * 子ウィジェットを追加
 	 */
-	void WGWidgetBase::addWidget( boost::weak_ptr< WGWidgetBase > widget )
+	void WGWidgetBase::addWidget( boost::shared_ptr< WGWidgetBase > widget )
 	{
-		if( !widget.lock() ){
+		if( widget == nullptr ){
 			return;
 		}
 
 		// 親を設定
-		widget.lock()->setParentWidget( shared_from_this() );
+		widget->setParentWidget( shared_from_this() );
 
 		this->childWidgets.push_back( widget );
 	}

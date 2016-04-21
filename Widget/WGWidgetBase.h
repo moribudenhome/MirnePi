@@ -27,11 +27,19 @@ namespace widget
 		
 		/** widgetを生成 */
 		template < typename T >
-		static boost::shared_ptr< T > createWidget(){
+		static boost::weak_ptr< T > createWidget( boost::weak_ptr<WGWidgetBase> parent ){
+			if (!parent.lock()) {
+				return boost::weak_ptr< T >();
+			}
 			auto w = boost::shared_ptr< T >(new T);
 			(boost::dynamic_pointer_cast<WGWidgetBase>(w))->Initialize();
-			return ( boost::shared_ptr< T >( new T ) );
+			parent.lock()->addWidget(w);
+			return w;
 		}
+		static boost::shared_ptr<WGWidgetBase> createRootWidget() {
+			return boost::shared_ptr<WGWidgetBase>(new WGWidgetBase());
+		}
+
 		/* 初期化 */
 		virtual void Initialize();
 
@@ -70,9 +78,6 @@ namespace widget
 		float getWidth() const { return ( this->size.width ); };
 		/** サイズを取得[H] */
 		float getHeight() const { return ( this->size.height ); };
-	public:
-		/** 指定座標と重なるか取得 */
-		virtual boost::weak_ptr< WGWidgetBase > isHit( float x, float y );
 	public:
 		/** 更新処理(WidgetManagerから呼ばれる) */
 		virtual void update( WGEventArgs* e );
@@ -119,12 +124,12 @@ namespace widget
 		/** 親ウィジェット */
 		boost::weak_ptr< WGWidgetBase > parentWidget;
 		/** 子ウィジェット */
-		std::vector< boost::weak_ptr< WGWidgetBase > > childWidgets;
+		std::vector< boost::shared_ptr< WGWidgetBase > > childWidgets;
 	public:
 		/** 親ウィジェットを設定 */
 		void setParentWidget( boost::weak_ptr< WGWidgetBase > parent ){ this->parentWidget = parent; };
 		/** 子ウィジェットを追加 */
-		void addWidget( boost::weak_ptr< WGWidgetBase > widget );
+		void addWidget( boost::shared_ptr< WGWidgetBase > widget );
 
 	};
 }
