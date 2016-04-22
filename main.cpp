@@ -61,9 +61,9 @@ int main()
 	//auto sprite = sdl.CreateSprite( "sample.png" );
 
 	auto root = widget::WGWidgetBase::create();
-	auto sprite = widget::WGSprite::createSprite(root, "sample.png");
+	auto sprite = CREATE_WIDGET(widget::WGSprite, root, "sample.png");
 	sprite.lock()->setPos( 50, 50 );
-	auto sprite2 = widget::WGSprite::createSprite(sprite, "sample.png");
+	auto sprite2 = CREATE_WIDGET(widget::WGSprite, root, "sample.png");
 	sprite2.lock()->setPos(50, 10);
 
 	while (true) {

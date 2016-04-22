@@ -7,12 +7,11 @@ namespace widget
 {
 	class WGSprite : public WGWidgetBase
 	{
-	public:
+		friend WGWidgetBase;
+	private:
 		WGSprite(std::string name);
-		~WGSprite();
-
 	public:
-		static boost::weak_ptr<WGSprite> createSprite(boost::weak_ptr<WGWidgetBase> parent, std::string name );
+		~WGSprite();
 	private:
 		std::shared_ptr<mop::Sprite> sprite;
 	};

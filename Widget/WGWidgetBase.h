@@ -3,11 +3,14 @@
 #include <boost/weak_ptr.hpp>
 #include <boost/signals2.hpp>
 #include <boost/enable_shared_from_this.hpp>
+#include <boost/smart_ptr/make_shared_array.hpp>
 #include <map>
 #include <vector>
 
 #include "WGStruct.h"
 #include "WGEventHandler.h"
+
+#define CREATE_WIDGET(T1,...) T1::create<T1>(__VA_ARGS__)
 
 namespace widget
 {
@@ -26,17 +29,17 @@ namespace widget
 		virtual ~WGWidgetBase(void);
 		
 		/** widgetを生成 */
-	protected:
-		template < typename T>
-		static boost::weak_ptr< T > createWidget( boost::weak_ptr<WGWidgetBase> parent, boost::shared_ptr< T > ptr){
+	public:
+		template < typename T, typename... Args>
+		static boost::weak_ptr< T > create(boost::weak_ptr<WGWidgetBase> parent, Args... args) {
 			if (!parent.lock()) {
 				return boost::weak_ptr< T >();
 			}
-			(boost::dynamic_pointer_cast<WGWidgetBase>(ptr))->Initialize();
-			parent.lock()->addWidget(ptr);
-			return ptr;
+			auto p = boost::shared_ptr<T>(new T(args...));
+			(boost::dynamic_pointer_cast<WGWidgetBase>(p))->Initialize();
+			parent.lock()->addWidget(p);
+			return p;
 		}
-	public:
 		static boost::shared_ptr<WGWidgetBase> create() {
 			return boost::shared_ptr<WGWidgetBase>(new WGWidgetBase());
 		}
