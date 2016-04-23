@@ -4,6 +4,8 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <memory>
+#include <tuple>
+#include <vector>
 
 namespace mop
 {
@@ -36,9 +38,16 @@ namespace mop
 		void EndRender();
 
 		// 文字列が焼きこまれたスプライトを生成
-		std::shared_ptr<Sprite> CreateStringSprite(TTF_Font* font, const std::string str, SDL_Color color);
+		std::shared_ptr<Sprite> CreateStringSprite(int fontSize, const std::string str, SDL_Color color);
 		// 画像からスプライトを生成
 		std::shared_ptr<Sprite> CreateSprite(const std::string name);
+
+		// 生成済みフォント管理
+	private:
+		std::vector<std::tuple<int, TTF_Font*>> createdFonts;
+	private:
+		TTF_Font* FindFont(int fontSize);
+		TTF_Font* CreateFont(int fontSize);
 
 	public:
 		SDL_Window* window;

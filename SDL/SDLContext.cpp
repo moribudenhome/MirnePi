@@ -20,6 +20,7 @@ namespace mop
 
 	Sprite::~Sprite()
 	{
+		SDL_DestroyTexture(texture);
 	}
 
 	void Sprite::Draw()
@@ -74,6 +75,11 @@ namespace mop
 	{
 		SDL_DestroyRenderer(renderer);
 		SDL_DestroyWindow(window);
+		SDL_RWclose(fontRWops);
+		for (auto itr = createdFonts.begin(); itr != createdFonts.end(); itr++) {
+			TTF_CloseFont(std::get<1>(*itr));
+		}
+		createdFonts.clear();
 		SDL_Quit();
 	}
 
@@ -89,8 +95,16 @@ namespace mop
 
 	////
 	// 文字列が焼きこまれたスプライトを生成
-	std::shared_ptr<Sprite> SDLContext::CreateStringSprite(TTF_Font* font, const std::string str, SDL_Color color)
+	std::shared_ptr<Sprite> SDLContext::CreateStringSprite(int fontSize, const std::string str, SDL_Color color)
 	{
+		TTF_Font* font = nullptr;
+		font = FindFont(fontSize);
+		if (font == nullptr) {
+			font = CreateFont(fontSize);
+			if (font == nullptr) { return nullptr; }
+			createdFonts.push_back(std::make_tuple(fontSize,font));
+		}
+
 		SDL_Surface* surface = TTF_RenderUTF8_Solid(font, str.c_str(), color);
 		if (surface == nullptr) {
 			return nullptr;
@@ -122,5 +136,18 @@ namespace mop
 		return sprite;
 	}
 
+	TTF_Font* SDLContext::FindFont(int fontSize)
+	{
+		for (auto itr = createdFonts.begin(); itr != createdFonts.end(); itr++) {
+			if (std::get<0>(*itr) == fontSize) {
+				return std::get<1>(*itr);
+			}
+		}
+		return nullptr;
+	}
 
+	TTF_Font* SDLContext::CreateFont(int fontSize)
+	{
+		return TTF_OpenFontRW(fontRWops, 0, fontSize);
+	}
 }

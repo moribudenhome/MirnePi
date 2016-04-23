@@ -10,6 +10,7 @@ OBJS = \
 	JoyStick.o \
 	WGWidgetBase.o \
 	WGSprite.o \
+	WGLabel.o \
 
 LIBS =
 
@@ -34,6 +35,8 @@ WGWidgetBase.o: Widget/WGWidgetBase.cpp
 	$(CXX) $(CXXFLAGS) -c Widget/WGWidgetBase.cpp -o WGWidgetBase.o $(LIBS)
 WGSprite.o: Widget/Parts/WGSprite.cpp
 	$(CXX) $(CXXFLAGS) -c Widget/Parts/WGSprite.cpp -o WGSprite.o $(LIBS)
+WGLabel.o: Widget/Parts/WGLabel.cpp
+	$(CXX) $(CXXFLAGS) -c Widget/Parts/WGLabel.cpp -o WGLabel.o $(LIBS)
 all:	$(TARGET)
 
 clean:

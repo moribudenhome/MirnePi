@@ -54,6 +54,7 @@ int main()
 
 #include "SDL/SDLContext.h"
 #include "Widget/Parts/WGSprite.h"
+#include "Widget/Parts/WGLabel.h"
 
 int main()
 {
@@ -67,6 +68,7 @@ int main()
 	sprite.lock()->SetLocalPos(widget::Vector2(5.0f, 5.0f));
 	auto sprite2 = CREATE_WIDGET(widget::WGSprite, sprite, "sample.png");
 	sprite2.lock()->SetLocalPos(widget::Vector2(50, 10));
+	auto label = CREATE_WIDGET(widget::WGLabel, sprite, 60, "こんにちは世界", SDL_Color{ 255, 255, 255, 0 });
 
 	auto a = sprite.lock()->GetPos();
 	sprite.lock()->GetTransformMatrix().dump();
@@ -75,7 +77,7 @@ int main()
 	sprite2.lock()->GetTransformMatrix().dump();
 	printf("sprite2 %f, %f\n", b.x, b.y);
 
-	float hoge = 0.0f;
+	float hoge = 3.0f;
 	while (true) {
 		SDL_Event ev;
 		while (SDL_PollEvent(&ev)) {
