@@ -75,9 +75,9 @@ namespace widget
 		Matrix3x3 GetTransformMatrix() { return mat; }
 	public:
 		/** 更新処理 */
-		virtual void Update( WGEventArgs* e );
+		virtual void Update();
 		/** 描画処理 */
-		virtual void Draw( WGEventArgs* e );
+		virtual void Draw();
 		
 		void UpdateMatrix( Matrix3x3* matrix );
 

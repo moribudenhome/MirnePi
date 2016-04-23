@@ -82,28 +82,28 @@ namespace widget
 	/** 
 	 * 更新処理
 	 */
-	void WGWidgetBase::Update( WGEventArgs* e )
+	void WGWidgetBase::Update()
 	{
 		this->pPrevOccurEventListAlias = &this->occurEventList[ this->occurEventListIdxCurrent ];
 		this->occurEventListIdxCurrent = (int)( this->occurEventListIdxCurrent == 0 );
 		this->occurEventList[ this->occurEventListIdxCurrent ].clear();
 
-		this->SendEvent( &this->OnUpdateHandle, shared_from_this(), e );
+		this->SendEvent( &this->OnUpdateHandle, shared_from_this(), nullptr );
 
 		for( unsigned int i = ( this->childWidgets.size() - 1 ); i <= 0; i++ ){
-			this->childWidgets.at( i )->Update( e );
+			this->childWidgets.at( i )->Update();
 		}
 	}
 
 	/** 
 	 * 描画処理
 	 */
-	void WGWidgetBase::Draw( WGEventArgs* e )
+	void WGWidgetBase::Draw()
 	{
-		this->SendEvent( &this->OnDrawHandle, shared_from_this(), e );
+		this->SendEvent( &this->OnDrawHandle, shared_from_this(), nullptr);
 
 		for( unsigned int i = 0; i < this->childWidgets.size(); i++ ){			
-			this->childWidgets.at( i )->Draw( e );
+			this->childWidgets.at( i )->Draw();
 		}
 	}
 
