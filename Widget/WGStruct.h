@@ -8,22 +8,25 @@ namespace widget
 	 * ウィジェットシステム内で使用される構造体を定義
 	 */
 
-	/** 2D座標を示す構造体 */
-	struct Point
+	/* 描画基準位置種別 */
+	enum PivotType
 	{
-		// Xを示す値を指定
-		float x;
-		// Yを示す値を指定
-		float y;
+		BottomLeft,
+		Left,
+		TopLeft,
+		BottomRight,
+		Right,
+		TopRight
 	};
 
-	/** 範囲,サイズを示す構造体 */
-	struct Rect
-	{
-		// 幅を示す値を指定
-		float width;
-		// 高さを示すあタイを指定
-		float height;
+	struct Vector2 {
+		Vector2(float x, float y) {
+			this->x = x; this->y = y;
+		}
+		Vector2() {
+			x = y = 0.0f;
+		}
+		float x, y;
 	};
 
 	struct Matrix3x3 {
@@ -57,8 +60,8 @@ namespace widget
 			mat = boost::numeric::ublas::prod(_mat.mat, mat);
 		}
 
-		Point transformPoint(const Point& point) {
-			Point result;
+		Vector2 transformPoint(const Vector2& point) {
+			Vector2 result;
 			result.x = mat(0, 0) * point.x + mat(0, 1) * point.y + mat(0, 2);
 			result.y = mat(1, 0) * point.x + mat(1, 1) * point.y + mat(1, 2);
 			return result;

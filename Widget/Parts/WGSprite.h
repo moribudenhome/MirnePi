@@ -12,6 +12,9 @@ namespace widget
 		WGSprite(std::string name);
 	public:
 		~WGSprite();
+	public:
+		/* 初期化 */
+		virtual void Initialize();
 	private:
 		std::shared_ptr<mop::Sprite> sprite;
 	};

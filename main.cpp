@@ -50,6 +50,8 @@ int main()
 
 #endif
 
+#if 1
+
 #include "SDL/SDLContext.h"
 #include "Widget/Parts/WGSprite.h"
 
@@ -60,12 +62,20 @@ int main()
 
 	//auto sprite = sdl.CreateSprite( "sample.png" );
 
-	auto root = widget::WGWidgetBase::create();
+	auto root = widget::WGWidgetBase::Create();
 	auto sprite = CREATE_WIDGET(widget::WGSprite, root, "sample.png");
-	sprite.lock()->setPos( 50, 50 );
-	auto sprite2 = CREATE_WIDGET(widget::WGSprite, root, "sample.png");
-	sprite2.lock()->setPos(50, 10);
+	sprite.lock()->SetLocalPos(widget::Vector2(5.0f, 5.0f));
+	auto sprite2 = CREATE_WIDGET(widget::WGSprite, sprite, "sample.png");
+	sprite2.lock()->SetLocalPos(widget::Vector2(50, 10));
 
+	auto a = sprite.lock()->GetPos();
+	sprite.lock()->GetTransformMatrix().dump();
+	printf("sprite %f, %f\n", a.x, a.y);
+	auto b = sprite2.lock()->GetPos();
+	sprite2.lock()->GetTransformMatrix().dump();
+	printf("sprite2 %f, %f\n", b.x, b.y);
+
+	float hoge = 0.0f;
 	while (true) {
 		SDL_Event ev;
 		while (SDL_PollEvent(&ev)) {
@@ -81,9 +91,12 @@ int main()
 			}
 		}
 		sdl->BeginRender();
-		root->update(NULL);
-		root->draw(NULL);
+		root->SetLocalScale(widget::Vector2(hoge, hoge));
+		root->Update(NULL);
+		root->Draw(NULL);
 		sdl->EndRender();
+
+		hoge += 0.01f;
 	}
 
 	//auto wm = widget::WGWidgetManager::createWidgetManager();
@@ -91,3 +104,32 @@ int main()
 	//auto w2 = widget::WGWidgetBase::createWidget<widget::WGSprite>();
 	//w->addWidget(w2);
 }
+
+#endif
+
+#if 0
+
+#include "SDL/SDLContext.h"
+#include "Widget/Parts/WGSprite.h"
+#include <iostream>
+
+int main()
+{
+	widget::Matrix3x3 mat1, mat2;
+	mat1.translate(5.0f, 5.0f);
+	//mat1.scale(0.5, 1.0);
+	mat2.translate(1.0f, 1.0f);
+	mat2.translate(1.0f, 1.0f);
+
+	mat1.dump();
+	mat2.dump();
+
+	widget::Matrix3x3 mat3 = (mat1*mat2);
+	mat3.dump();
+
+	widget::Vector2 p; p.x = 0.0f; p.y = 0.0f;
+	p = mat3.transformPoint(p);
+	printf("%f, %f", p.x, p.y);
+}
+
+#endif

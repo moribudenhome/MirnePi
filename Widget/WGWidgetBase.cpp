@@ -17,119 +17,116 @@ namespace widget
 	 */
 	void WGWidgetBase::Initialize()
 	{
-		memset(&this->pos, 0, sizeof(this->pos));
-		memset(&this->size, 0, sizeof(this->size));
 		this->occurEventListIdxCurrent = 0;
-
 		this->pPrevOccurEventListAlias = &this->occurEventList[1];
+		this->pivotType = PivotType::TopLeft;
+		mat.identity();
+		localScale = Vector2(1.0f, 1.0f);
+		localSize = Vector2(1.0f, 1.0f);
 	}
 
-	/** 
-	 * 位置を取得
-	 */
-	Point WGWidgetBase::getPos() const 
-	{ 
-		Point p = { this->getPosX(), this->getPosY() };
-
-		return ( p );
-	}
-
-	/** 
-	 * 位置を取得[X]
-	 */
-	float WGWidgetBase::getPosX() const 
-	{ 
-		if( this->parentWidget.lock() ){
-			
-			return ( this->parentWidget.lock()->getPosX() + this->pos.x );
-		}
-		
-		return ( this->pos.x );
-	}
-
-	/** 
-	 * 位置を取得[Y]
-	 */
-	float WGWidgetBase::getPosY() const 
-	{ 
-		if( this->parentWidget.lock() ){
-			
-			return ( this->parentWidget.lock()->getPosY() + this->pos.y );
-		}
-
-		return ( this->pos.y );
-	}
-
-	/** 
-	 * 基準位置を取得
-	 */
-	Point WGWidgetBase::getExtraPos() const
+	/** ローカルの位置を設定 */
+	void WGWidgetBase::SetLocalPos( Vector2 pos )
 	{
-		Point p;
-		p.x = this->getExtraPosX();
-		p.y = this->getExtraPosY();
-		return ( p );
-	}
-
-	/** 
-	 * 基準位置を取得[X]
-	 */
-	float WGWidgetBase::getExtraPosX() const
-	{
-		if( this->parentWidget.lock() ){
-			
-			return ( this->parentWidget.lock()->getPosX() );
+		localPos = pos;
+		if (parentWidget.lock()) {
+			Matrix3x3 parent = parentWidget.lock()->GetTransformMatrix();
+			UpdateMatrix(&parent);
 		}
-
-		return ( 0.0f );
+		else {
+			UpdateMatrix(nullptr);
+		}	
 	}
 
-	/** 
-	 * 基準位置を取得[Y]
-	 */
-	float WGWidgetBase::getExtraPosY() const
+	/** ローカルスケールを設定 */
+	void WGWidgetBase::SetLocalScale(Vector2 scale)
 	{
-		if( this->parentWidget.lock() ){
-			
-			return ( this->parentWidget.lock()->getPosY() );
+		localScale = scale;
+		if (parentWidget.lock()) {
+			Matrix3x3 parent = parentWidget.lock()->GetTransformMatrix();
+			UpdateMatrix(&parent);
 		}
+		else {
+			UpdateMatrix(nullptr);
+		}
+	}
 
-		return ( 0.0f );
+	/**
+	* 位置を取得
+	*/
+	Vector2 WGWidgetBase::GetPos()
+	{
+		return (mat.transformPoint(Vector2()));
+	}
+
+	/* サイズを取得 */
+	Vector2 WGWidgetBase::GetSize()
+	{
+		Matrix3x3 _mat = mat;
+		_mat.mat(0, 2) = _mat.mat(1, 2) = 0.0f; // offset値は要らないので潰す
+		return _mat.transformPoint(localSize);
+	}
+
+	/** 左上の座標を取得 */
+	Vector2 WGWidgetBase::GetTopLeftPos()
+	{
+		// TODO PivotTypeによってずらしてあげる処理が必要
+
+		Vector2 result;
+		result.x = GetPos().x;
+		result.y = GetPos().y;
+
+		return result;
 	}
 
 	/** 
-	 * 更新処理(WidgetManagerから呼ばれる)
+	 * 更新処理
 	 */
-	void WGWidgetBase::update( WGEventArgs* e )
+	void WGWidgetBase::Update( WGEventArgs* e )
 	{
 		this->pPrevOccurEventListAlias = &this->occurEventList[ this->occurEventListIdxCurrent ];
 		this->occurEventListIdxCurrent = (int)( this->occurEventListIdxCurrent == 0 );
 		this->occurEventList[ this->occurEventListIdxCurrent ].clear();
 
-		this->sendEvent( &this->onUpdateHandle, shared_from_this(), e );
+		this->SendEvent( &this->OnUpdateHandle, shared_from_this(), e );
 
 		for( unsigned int i = ( this->childWidgets.size() - 1 ); i <= 0; i++ ){
-			this->childWidgets.at( i )->update( e );
+			this->childWidgets.at( i )->Update( e );
 		}
 	}
 
 	/** 
-	 * 描画処理(WidgetManagerから呼ばれる)
+	 * 描画処理
 	 */
-	void WGWidgetBase::draw( WGEventArgs* e )
+	void WGWidgetBase::Draw( WGEventArgs* e )
 	{
-		this->sendEvent( &this->onDrawHandle, shared_from_this(), e );
+		this->SendEvent( &this->OnDrawHandle, shared_from_this(), e );
 
 		for( unsigned int i = 0; i < this->childWidgets.size(); i++ ){			
-			this->childWidgets.at( i )->draw( e );
+			this->childWidgets.at( i )->Draw( e );
 		}
 	}
 
+	void WGWidgetBase::UpdateMatrix( Matrix3x3* matrix )
+	{
+		// 行列を作り直す
+		mat.identity();
+		mat.translate(localPos.x, localPos.y);
+		mat.scale(localScale.x, localScale.y);
+
+		if (matrix != nullptr) {
+			mat = mat * *matrix;
+		}
+		for (unsigned int i = 0; i < this->childWidgets.size(); i++) {
+			this->childWidgets.at(i)->UpdateMatrix( &mat );
+		}
+
+	}
 
 	/** 
 	 * 直前のフレームで当該イベントは発生していたか
 	 */
-	bool WGWidgetBase::isPrevFrameOccurEvent( EventHandler* pEvent )
+	bool WGWidgetBase::IsPrevFrameOccurEvent( EventHandler* pEvent )
 	{
 		if( this->pPrevOccurEventListAlias == NULL ){
 			return ( false );
@@ -143,7 +140,7 @@ namespace widget
 	/** 
 	 * 現在のフレームで当該イベントは発生していたか
 	 */
-	bool  WGWidgetBase::isCurrentFrameOccurEvent( EventHandler* pEvent )
+	bool  WGWidgetBase::IsCurrentFrameOccurEvent( EventHandler* pEvent )
 	{
 		std::map< EventHandler*, bool >::iterator ite;
 		ite = this->occurEventList[ this->occurEventListIdxCurrent ].find( pEvent );
@@ -153,14 +150,14 @@ namespace widget
 	/** 
 	 * 子ウィジェットを追加
 	 */
-	void WGWidgetBase::addWidget( boost::shared_ptr< WGWidgetBase > widget )
+	void WGWidgetBase::AddWidget( boost::shared_ptr< WGWidgetBase > widget )
 	{
 		if( widget == nullptr ){
 			return;
 		}
 
 		// 親を設定
-		widget->setParentWidget( shared_from_this() );
+		widget->SetParentWidget( shared_from_this() );
 
 		this->childWidgets.push_back( widget );
 	}

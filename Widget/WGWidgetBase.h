@@ -10,14 +10,13 @@
 #include "WGStruct.h"
 #include "WGEventHandler.h"
 
-#define CREATE_WIDGET(T1,...) T1::create<T1>(__VA_ARGS__)
+#define CREATE_WIDGET(T1,...) T1::Create<T1>(__VA_ARGS__)
 
 namespace widget
 {
-	class WGWidgetManager;
-
 	/**
 	 * 全てのウィジェットの基底となるクラス
+	 * TODO 座標変換周りが冗長な感じになってるの計算遅いかも。後で治す。
 	 */
 	class WGWidgetBase : public boost::enable_shared_from_this< WGWidgetBase >
 	{
@@ -31,16 +30,16 @@ namespace widget
 		/** widgetを生成 */
 	public:
 		template < typename T, typename... Args>
-		static boost::weak_ptr< T > create(boost::weak_ptr<WGWidgetBase> parent, Args... args) {
+		static boost::weak_ptr< T > Create(boost::weak_ptr<WGWidgetBase> parent, Args... args) {
 			if (!parent.lock()) {
 				return boost::weak_ptr< T >();
 			}
 			auto p = boost::shared_ptr<T>(new T(args...));
 			(boost::dynamic_pointer_cast<WGWidgetBase>(p))->Initialize();
-			parent.lock()->addWidget(p);
+			parent.lock()->AddWidget(p);
 			return p;
 		}
-		static boost::shared_ptr<WGWidgetBase> create() {
+		static boost::shared_ptr<WGWidgetBase> Create() {
 			return boost::shared_ptr<WGWidgetBase>(new WGWidgetBase());
 		}
 
@@ -50,57 +49,57 @@ namespace widget
 		////
 		// 基本機能
 	public:
-		/** 位置を設定 */
-		void setPos( float x, float y ){ this->pos.x = x; this->pos.y = y; };
-		/** 位置を設定 */
-		void setPos( Point pos ){ this->pos = pos; };
-		/** 位置を取得 */
-		Point getPos() const;
-		/** 位置を取得[X] */
-		float getPosX() const;
-		/** 位置を取得[Y] */
-		float getPosY() const;
-		/** 基準位置を取得 */
-		Point getExtraPos() const;
-		/** 基準位置を取得[X] */
-		float getExtraPosX() const;
-		/** 基準位置を取得[Y] */
-		float getExtraPosY() const;
+		/** 描画基準位置設定 */
+		void SetPivotType( PivotType type ) { pivotType = type; };
+		/** 描画基準位置取得 */
+		PivotType GetPivotType() const { return pivotType; };
+		/** ローカルの位置を設定 */
+		void SetLocalPos( Vector2 pos );
 		/** ローカルの位置を取得 */
-		Point getLocalPos() const { return ( this->pos ); };
-		/** ローカルの位置を取得[X] */
-		float getLocalPosX() const { return ( this->pos.x ); };
-		/** ローカルの位置を取得[Y] */
-		float getLocalPosY() const { return ( this->pos.y ); };
-		/** サイズを設定 */
-		void setSize( float width, float height ) { this->size.width = width; this->size.height= height; };
-		/** サイズを設定 */
-		void setSize( Rect size ) { this->size = size; };
-		/** サイズを取得 */
-		Rect getSize() const { return ( this->size ); };
-		/** サイズを取得[W] */
-		float getWidth() const { return ( this->size.width ); };
-		/** サイズを取得[H] */
-		float getHeight() const { return ( this->size.height ); };
+		Vector2 GetLocalPos() const { return ( this->localPos); };
+		/** ローカルスケールを設定 */
+		void SetLocalScale( Vector2 scale );
+		/** ローカルスケールを取得 */
+		Vector2 GetLocalScale(Vector2 scale) { return localScale; };
+		/** ローカルサイズを設定 */
+		void SetLocalSize( Vector2 size ) { this->localSize = size; };
+		/** ローカルサイズを設定 */
+		Vector2 GetLocalSize(Vector2 size) { return localSize; };
+		/** 位置を取得 */
+		Vector2 GetPos();
+		/* サイズを取得 */
+		Vector2 GetSize();
+		/** 左上の座標を取得 */
+		Vector2 GetTopLeftPos();
+		/** 変換済み行列を取得 */
+		Matrix3x3 GetTransformMatrix() { return mat; }
 	public:
-		/** 更新処理(WidgetManagerから呼ばれる) */
-		virtual void update( WGEventArgs* e );
-		/** 描画処理(WidgetManagerから呼ばれる) */
-		virtual void draw( WGEventArgs* e );
+		/** 更新処理 */
+		virtual void Update( WGEventArgs* e );
+		/** 描画処理 */
+		virtual void Draw( WGEventArgs* e );
+		
+		void UpdateMatrix( Matrix3x3* matrix );
 
 	private:
 		/** 位置 */
-		Point pos;
+		Vector2 localPos;
 		/** 幅、高さ */
-		Rect size;
+		Vector2 localSize;
+		/* スケール */
+		Vector2 localScale;
+		/* 変換済み行列 */
+		Matrix3x3 mat;
+
+		PivotType pivotType;
 
 		/////
 		// イベント関連
 	public:
 		/** 描画イベント */
-		EventHandler onDrawHandle;
+		EventHandler OnDrawHandle;
 		/** 更新イベント */
-		EventHandler onUpdateHandle;
+		EventHandler OnUpdateHandle;
 
 	public:
 		/** 直前のフレームで発生したイベントリストへのポインタ(アクセス用) */
@@ -113,14 +112,14 @@ namespace widget
 	public:
 		/** イベントの呼び出し(イベントの呼び出しは必ずこのメソッドを介して行うルール) */
 		template <typename T1, typename T2, typename T3>
-		void sendEvent( T1 handle, T2 sender, T3 e ){
+		void SendEvent( T1 handle, T2 sender, T3 e ){
 			(*handle)( sender, e );
 			this->occurEventList[ this->occurEventListIdxCurrent ][ (EventHandler*)handle ] = false;
 		}
 		/** 直前のフレームで当該イベントは発生していたか */
-		bool isPrevFrameOccurEvent( EventHandler* pEvent );
+		bool IsPrevFrameOccurEvent( EventHandler* pEvent );
 		/** 現在のフレームで当該イベントは発生していたか */
-		bool isCurrentFrameOccurEvent( EventHandler* pEvent );
+		bool IsCurrentFrameOccurEvent( EventHandler* pEvent );
 
 		////
 		// 階層構造関連
@@ -131,10 +130,9 @@ namespace widget
 		std::vector< boost::shared_ptr< WGWidgetBase > > childWidgets;
 	public:
 		/** 親ウィジェットを設定 */
-		void setParentWidget( boost::weak_ptr< WGWidgetBase > parent ){ this->parentWidget = parent; };
+		void SetParentWidget( boost::weak_ptr< WGWidgetBase > parent ){ this->parentWidget = parent; };
 		/** 子ウィジェットを追加 */
-		void addWidget( boost::shared_ptr< WGWidgetBase > widget );
-
+		void AddWidget( boost::shared_ptr< WGWidgetBase > widget );
 	};
 }
 
